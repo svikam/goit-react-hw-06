@@ -1,44 +1,44 @@
 import ContactForm from './ContactForm/ContactForm';
 import SearchBox from './SearchBox/SearchBox';
 import ContactList from './ContactList/ContactList';
-import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectNameFilter, changeFilter } from "../redux/filtersSlice";
+import { addContact, deleteContact, selectContacts } from "../redux/contactsSlice";
 
 const App = () => {
-    const [contacts, setContacts] = useState(() => {
-        const saveData = JSON.parse(window.localStorage.getItem('contacts'));
-        if (saveData) {
-            return saveData;
-        }
-        return [
-            { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-            { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-            { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-            { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-        ]
-    });
-    const [filter, setFilter] = useState('');
+    const contacts = useSelector(selectContacts);
+    const filter = useSelector(selectNameFilter);
+    const dispatch = useDispatch();
     const visibleContacts = contacts.filter((contact) =>
         contact.name.toLowerCase().includes(filter.toLowerCase())
     );
-    const addContact = (newContact) => {
-        setContacts((prevContacts) => {
-            return [...prevContacts, newContact];
-        });
+    // const initialContacts = [
+    //     { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    //     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    //     { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    //     { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    // ];
+    // useEffect(() => {
+    //     if (contacts.length === 0) {
+    //         dispatch(setInitialContacts(initialContacts));
+    //     }
+    // }, [contacts, dispatch]);
+    const handleAddContact = (newContact) => {
+        dispatch(addContact(newContact));
     };
-    const deleteContact = (id) => {
-        setContacts((prevContacts) => {
-            return prevContacts.filter((contact) => contact.id !== id);
-        });
+    const handleDeleteContact = (id) => {
+        dispatch(deleteContact(id));
     };
-    useEffect(() => {
-        window.localStorage.setItem("contacts", JSON.stringify(contacts))
-    }, [contacts]);
+    const handleSearch = (search) => {
+        dispatch(changeFilter(search));
+    };
+
     return (
         <div>
             <h1>Phonebook</h1>
-            <ContactForm onAdd={addContact} />
-            <SearchBox value={filter} onFilter={setFilter}/>
-            <ContactList contacts={visibleContacts} onDelete={deleteContact} />
+            <ContactForm onAdd={handleAddContact} />
+            <SearchBox value={filter} onFilter={handleSearch} />
+            <ContactList contacts={visibleContacts} onDelete={handleDeleteContact} />
         </div>
     );
 };
